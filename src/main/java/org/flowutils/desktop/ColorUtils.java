@@ -1,10 +1,12 @@
 package org.flowutils.desktop;
 
+import org.flowutils.MathUtils;
 import org.flowutils.random.RandomSequence;
 
 import java.awt.*;
 
-import static org.flowutils.MathUtils.*;
+import static org.flowutils.MathUtils.clamp;
+import static org.flowutils.MathUtils.mix;
 
 /**
  * Color related utility functions.
@@ -56,6 +58,131 @@ public final class ColorUtils {
     private static int mixComponent(double mixAmount, int c1, int c2) {
         final int mixedValue = (int) mix(mixAmount, c1, c2);
         return clamp(mixedValue, 0, 255);
+    }
+
+    public static double hue(Color color) {
+        double hue;
+        double r = color.getRed() / 255.0;
+        double g = color.getGreen() / 255.0;
+        double b = color.getBlue() / 255.0;
+
+        double cmax = (r > g) ? r : g;
+        if (b > cmax) cmax = b;
+
+        double cmin = (r < g) ? r : g;
+        if (b < cmin) cmin = b;
+
+        double saturation;
+        if (cmax == 0) {
+            saturation = 0;
+        } else {
+            saturation = (cmax - cmin) / cmax;
+        }
+
+        if (saturation == 0) {
+            hue = 0;
+        }
+        else {
+            double redc   = (cmax - r) / (cmax - cmin);
+            double greenc = (cmax - g) / (cmax - cmin);
+            double bluec  = (cmax - b) / (cmax - cmin);
+
+            if (r == cmax) hue = bluec - greenc;
+            else if (g == cmax) hue = 2.0 + redc - bluec;
+            else hue = 4.0 + greenc - redc;
+            hue = hue / 6.0f;
+            if (hue < 0) hue = hue + 1.0;
+        }
+
+        return hue;
+    }
+
+    public static double sat(Color color) {
+        double r = color.getRed() / 255.0;
+        double g = color.getGreen() / 255.0;
+        double b = color.getBlue() / 255.0;
+
+        double cmax = (r > g) ? r : g;
+        if (b > cmax) cmax = b;
+
+        double cmin = (r < g) ? r : g;
+        if (b < cmin) cmin = b;
+
+        double saturation;
+        if (cmax == 0) {
+            saturation = 0;
+        } else {
+            saturation = (cmax - cmin) / cmax;
+        }
+
+        return saturation;
+    }
+
+    public static double lum(Color color) {
+        double r = color.getRed() / 255.0;
+        double g = color.getGreen() / 255.0;
+        double b = color.getBlue() / 255.0;
+
+        double cmax = (r > g) ? r : g;
+        if (b > cmax) cmax = b;
+
+        return cmax;
+    }
+
+    public static Color hslColor(double hue, double sat, double lum) {
+        return hslColor(hue, sat, lum, 1.0);
+    }
+
+    public static Color hslColor(double hue, double sat, double lum, double alpha) {
+        hue   = MathUtils.wrap0To1(hue);
+        sat   = MathUtils.clamp0To1(sat);
+        lum   = MathUtils.clamp0To1(lum);
+        alpha = MathUtils.clamp0To1(alpha);
+
+        double r = 0, g = 0, b = 0;
+        if (sat == 0) {
+            r = g = b = lum;
+        } else {
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            double p = lum * (1.0f - sat);
+            double q = lum * (1.0f - sat * f);
+            double t = lum * (1.0f - (sat * (1.0f - f)));
+            switch ((int) h) {
+                case 0:
+                    r = lum;
+                    g = t;
+                    b = p;
+                    break;
+                case 1:
+                    r = q;
+                    g = lum;
+                    b = p;
+                    break;
+                case 2:
+                    r = p;
+                    g = lum;
+                    b = t;
+                    break;
+                case 3:
+                    r = p;
+                    g = q;
+                    b = lum;
+                    break;
+                case 4:
+                    r = t;
+                    g = p;
+                    b = lum;
+                    break;
+                case 5:
+                    r = lum;
+                    g = p;
+                    b = q;
+                    break;
+            }
+        }
+
+        return new Color((float) r, (float) g, (float) b, (float) alpha);
     }
 
 
