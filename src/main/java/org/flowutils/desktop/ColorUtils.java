@@ -51,15 +51,10 @@ public final class ColorUtils {
                          randomizeAlpha ? randomSequence.nextInt(256) : 255);
     }
 
-    // TODO: Implement
-    // public static Color hslColor(double hue, double saturation, double luminance) {
 
-
-    private static int mixComponent(double mixAmount, int c1, int c2) {
-        final int mixedValue = (int) mix(mixAmount, c1, c2);
-        return clamp(mixedValue, 0, 255);
-    }
-
+    /**
+     * @return the hue of the specified color, from 0 to 1.
+     */
     public static double hue(Color color) {
         double hue;
         double r = color.getRed() / 255.0;
@@ -97,6 +92,9 @@ public final class ColorUtils {
         return hue;
     }
 
+    /**
+     * @returnt the saturation of the specified color, 0 = greyscale, 1 = fully saturated.
+     */
     public static double sat(Color color) {
         double r = color.getRed() / 255.0;
         double g = color.getGreen() / 255.0;
@@ -118,21 +116,37 @@ public final class ColorUtils {
         return saturation;
     }
 
+    /**
+     * @return the luminance of the specified color, 0 = black, 1 = bright.
+     */
     public static double lum(Color color) {
         double r = color.getRed() / 255.0;
         double g = color.getGreen() / 255.0;
         double b = color.getBlue() / 255.0;
 
-        double cmax = (r > g) ? r : g;
-        if (b > cmax) cmax = b;
+        double maxComponent = (r > g) ? r : g;
+        if (b > maxComponent) maxComponent = b;
 
-        return cmax;
+        return maxComponent;
     }
 
+    /**
+     * @param hue range 0 (red) to 1 (red)
+     * @param sat range 0 (greyscale) to 1 (fully saturated)
+     * @param lum range 0 (black) to 1 (fully bright colors)
+     * @return new color with the specified hue, saturation and luminance.
+     */
     public static Color hslColor(double hue, double sat, double lum) {
         return hslColor(hue, sat, lum, 1.0);
     }
 
+    /**
+     * @param hue range 0 (red) to 1 (red)
+     * @param sat range 0 (greyscale) to 1 (fully saturated)
+     * @param lum range 0 (black) to 1 (fully bright colors)
+     * @param alpha transparency, from 0 (transparent) to 1 (opaque)
+     * @return new color with the specified hue, saturation, luminance and alpha.
+     */
     public static Color hslColor(double hue, double sat, double lum, double alpha) {
         hue   = MathUtils.wrap0To1(hue);
         sat   = MathUtils.clamp0To1(sat);
@@ -183,6 +197,11 @@ public final class ColorUtils {
         }
 
         return new Color((float) r, (float) g, (float) b, (float) alpha);
+    }
+
+    private static int mixComponent(double mixAmount, int c1, int c2) {
+        final int mixedValue = (int) mix(mixAmount, c1, c2);
+        return clamp(mixedValue, 0, 255);
     }
 
 
